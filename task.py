@@ -8,23 +8,15 @@ def read_file(filename: str) -> list[dict]:
     :return: Список словарей с данными о домах.
     """
 
-    my_file = open(filename, 'r', encoding='utf-8')
-    reader = csv.DictReader(my_file)
-    my_list_ = list(reader)
-#   print("Dictionary after typecasting:")
-    for i in my_list_:
-        #    print(i)
-        for key, value in i.items():
-            if key == 'floor_count':
-                i[key] = int(value)
-            if key == 'heating_value':
-                i[key] = float(value)
-            if key == 'area_residential':
-                i[key] = float(value)
-            if key == 'population':
-                i[key] = int(value)
-#            print(f"{key}, {value}, {type(i[key])}")
-    return my_list_
+    with open(filename, encoding='utf-8') as my_file:
+        reader = csv.DictReader(my_file)
+        my_houses = list(reader)
+        for house in my_houses:
+            house['floor_count'] = int(house['floor_count'])
+            house['heating_value'] = float(house['heating_value'])
+            house['area_residential'] = float(house['area_residential'])
+            house['population'] = int(house['population'])
+    return my_houses
 
 
 def classify_house(floor_count: int) -> str:
@@ -41,12 +33,11 @@ def classify_house(floor_count: int) -> str:
     if floor_count <= 0:
         raise ValueError('positive number expected')
     if floor_count <= 5:
-        return 'Малоэтажный'
+        return "Малоэтажный"
+    elif floor_count <= 16:
+        return "Среднеэтажный"
     else:
-        if floor_count <=16:
-            return 'Среднеэтажный'
-        else:
-            return 'Многоэтажный'
+        return "Многоэтажный"
 
 
 def get_classify_houses(houses: list[dict]) -> list[str]:
@@ -55,14 +46,7 @@ def get_classify_houses(houses: list[dict]) -> list[str]:
     :param houses: Список словарей с данными о домах.
     :return: Список категорий домов.
     """
-    categories = []
-    for i in houses:
-        #    print(i)
-        for key, value in i.items():
-            if key == 'floor_count':
-                cat = classify_house(value)
-                categories.append(cat)
-    return categories
+    return [classify_house(house['floor_count']) for house in houses]
 
 
 def get_count_house_categories(categories: list[str]) -> dict[str, int]:
@@ -81,6 +65,7 @@ def get_count_house_categories(categories: list[str]) -> dict[str, int]:
 
     return category_count
 
+
 def min_area_residential(houses: list[dict]) -> str:
     """Находит адрес дома с наименьшим средним количеством квадратных метров жилой площади на одного жильца.
 
@@ -89,10 +74,10 @@ def min_area_residential(houses: list[dict]) -> str:
     """
     min_area = houses[0]['area_residential'] / houses[0]['population']
     address = houses[0]['house_address']
-    for i in houses:
-        if i['area_residential']/i['population'] < min_area:
-            min_area = i['area_residential']/i['population']
-            address = i['house_address']
+    for house in houses:
+        if house['area_residential']/house['population'] < min_area:
+            min_area = house['area_residential']/house['population']
+            address = house['house_address']
     return address
 
 
